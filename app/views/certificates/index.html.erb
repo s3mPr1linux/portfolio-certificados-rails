@@ -1,0 +1,57 @@
+<!-- Filtros de Ordenação -->
+<div class="filters">
+  <div class="filter-group">
+    <label data-lang-pt="Ordenar por:" data-lang-en="Sort by:">Ordenar por:</label>
+    <select id="orderBy">
+      <option value="issued_at" selected data-lang-pt="Data de Emissão" data-lang-en="Issue Date">Data de Emissão</option>
+      <option value="title" data-lang-pt="Título" data-lang-en="Title">Título</option>
+      <option value="issuer" data-lang-pt="Emissor" data-lang-en="Issuer">Emissor</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label data-lang-pt="Ordem:" data-lang-en="Order:">Ordem:</label>
+    <select id="orderDir">
+      <option value="DESC" selected data-lang-pt="Decrescente" data-lang-en="Descending">Decrescente</option>
+      <option value="ASC" data-lang-pt="Crescente" data-lang-en="Ascending">Crescente</option>
+    </select>
+  </div>
+</div>
+
+<div class="gallery">
+  <% @certificates.each do |certificate| %>
+    <%# O Rails resolve a URL da imagem do Active Storage no momento do clique %>
+    <% image_url = certificate.image.attached? ? url_for(certificate.image) : '' %>
+    
+    <div class="card" onclick="openLightbox('<%= image_url %>', '<%= certificate.validation_url %>')">
+      
+      <% if certificate.image.attached? %>
+        <%= image_tag certificate.image, alt: certificate.name %>
+      <% else %>
+        <div style="height: 240px; background: #222; display: flex; align-items: center; justify-content: center; color: #666;">
+          Sem Imagem
+        </div>
+      <% end %>
+
+      <div class="card-title">
+        <strong><%= certificate.name %></strong><br>
+        <span data-lang-pt="Emissor:" data-lang-en="Issuer:">Emissor:</span> <%= certificate.issuer %><br>
+        <span style="color: var(--text-secondary); font-size: 0.9em;"><%= certificate.issue_date.strftime("%d/%m/%Y") if certificate.issue_date %></span>
+      </div>
+    <!-- INÍCIO DOS CONTROLES DE ADMINISTRAÇÃO -->
+      <div style="display: flex; justify-content: space-between; padding: 12px 15px; border-top: 1px solid var(--border-color); background: var(--bg-primary);" onclick="event.stopPropagation()">
+        <%= link_to "✏️ Editar", edit_certificate_path(certificate), style: "color: #3b82f6; text-decoration: none; font-size: 0.9em; font-weight: 600;" %>
+        <%= link_to "🗑️ Excluir", certificate, data: { turbo_method: :delete, turbo_confirm: "Tem certeza que deseja apagar este certificado?" }, style: "color: #ef4444; text-decoration: none; font-size: 0.9em; font-weight: 600;" %>
+      </div>
+      <!-- FIM DOS CONTROLES -->
+    </div>
+  <% end %>
+</div>
+
+<!-- Lightbox (Fica invisível até ser chamado pelo Javascript) -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div id="lightbox-content" onclick="event.stopPropagation()" style="display: flex; flex-direction: column; align-items: center;">
+    <img id="lightbox-img" src="">
+    <br>
+    <a id="lightbox-link" class="verify" href="#" target="_blank" data-lang-pt="🔗 Verificar credencial" data-lang-en="🔗 Verify credential">🔗 Verificar credencial</a>
+  </div>
+</div>
